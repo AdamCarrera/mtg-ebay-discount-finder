@@ -8,7 +8,6 @@ class ScryfallConfig:
 
     def get_scryfall_prices(self):
         r = requests.get(self.search_url).json()
-        print("-" * 30)
         print(f"Name: {r['name']}")
         print(f"Set: {r['set_name']}")
         print(f"EDHRec Rank: {r['edhrec_rank']}")
@@ -21,3 +20,10 @@ class ScryfallConfig:
 
     def to_collector_number(self, name, set):
         pass
+
+    def get_set_codes(self):
+        r = requests.get("https://api.scryfall.com/sets/").json()
+        for item in r['data']:
+            print(f"Set name: {item['name']}")
+            print(f"Set code: {item['code']}")
+            print("-" * 30)
