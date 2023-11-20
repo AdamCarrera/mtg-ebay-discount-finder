@@ -44,7 +44,7 @@ class EbayConfig:
     cert_id: str = os.getenv("CERT_ID")
     access_token: str = os.getenv("API_KEY")
     query: str = 'laptop'
-    search_url: str = "https://api.sandbox.ebay.com/buy/browse/v1/item_summary/search"
+    search_url: str = "https://api.ebay.com/buy/browse/v1/item_summary/search"
     headers: Dict[str, str] = field(default_factory=defaut_ebay_headers)
     params: Dict[str, str] = field(default=None)
 
@@ -69,12 +69,13 @@ class EbayConfig:
             # Extract and print relevant information from the response
 
             if data["total"] > 0:
-                for item in data["itemSummaries"]:
-                    print("Title:", item["title"])
-                    print("Price:", item["price"]["value"], item["price"]["currency"])
-                    print("Item ID:", item["itemId"])
-                    print("URL:", item["itemWebUrl"])
-                    print("-" * 30)
+                print(data["itemSummaries"])
+                # for item in data["itemSummaries"]:
+                #     print("Title:", item["title"])
+                #     print("Price:", item["price"]["value"], item["price"]["currency"])
+                #     print("Item ID:", item["itemId"])
+                #     print("URL:", item["itemWebUrl"])
+                #     print("-" * 30)
             else:
                 print("No items found")
         else:
