@@ -1,6 +1,7 @@
 import requests
 from dataclasses import dataclass
 from typing import Dict
+import re
 
 @dataclass
 class Scryfall:
@@ -24,14 +25,24 @@ class Scryfall:
             r = requests.get("https://api.scryfall.com/sets/").json()['data']
             self.sets = {item['name']: item['code'] for item in r}
 
-        
-
     def to_collector_number(self, name, set):
         pass
 
-    def to_set_code(self, set_name):
-        pass
-        # for item in r['data']:
-        #     print(f"Set name: {item['name']}")
-        #     print(f"Set code: {item['code']}")
-        #     print("-" * 30)
+    def parse_listing(self, listing: str) -> list:
+        set_code_pattern = r"\b(" + "|".join(self.sets.values()) + r")\b"
+
+        patterns = [r"\b" + re.escape(name) + r"\b" for name in self.sets.keys()]
+
+        set_name_pattern = "|".join(patterns)
+
+        matches = []
+
+        set_code_matches = re.findall(set_code_pattern, listing, flags=re.IGNORECASE)
+        matches.append(set_code_matches)
+
+        set_name_matches = re.findall(set_name_pattern, listing, flags=re.IGNORECASE)
+        matches.append(set_name_matches)
+
+        return matches
+
+
