@@ -1,6 +1,7 @@
 import requests
 from dataclasses import dataclass
 from typing import Dict
+from fuzzywuzzy import fuzz
 import re
 
 @dataclass
@@ -43,6 +44,18 @@ class Scryfall:
         set_name_matches = re.findall(set_name_pattern, listing, flags=re.IGNORECASE)
         matches.append(set_name_matches)
 
+        return matches
+    
+    def parse_listing_fuzzy(self, listing: str) -> list:
+        threshold = 70
+        matches = []
+
+        # matches = [name for name in self.sets.keys() if fuzz.partial_ratio(name.lower(), listing.lower()) >= threshold]
+
+        for name in self.sets.keys():
+            ratio = fuzz.partial_ratio(name.lower(), listing.lower())
+            if ratio >= threshold:
+                matches.append(name)
         return matches
 
 
