@@ -24,7 +24,7 @@ def default_ebay_params(query: str) -> Dict:
 
 
 @dataclass
-class EbayConfig:
+class Ebay:
     """
     Represents a configuration class for eBay API settings.
 
@@ -66,16 +66,10 @@ class EbayConfig:
         if response.status_code == 200:
             # The API response is usually in JSON format
             data = response.json()
-            # Extract and print relevant information from the response
+            # Extract and return relevant information from the response
 
             if data["total"] > 0:
-                print(data["itemSummaries"])
-                # for item in data["itemSummaries"]:
-                #     print("Title:", item["title"])
-                #     print("Price:", item["price"]["value"], item["price"]["currency"])
-                #     print("Item ID:", item["itemId"])
-                #     print("URL:", item["itemWebUrl"])
-                #     print("-" * 30)
+                return data["itemSummaries"]
             else:
                 print("No items found")
         else:
