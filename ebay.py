@@ -2,7 +2,7 @@ import os
 import requests
 from dotenv import load_dotenv
 from dataclasses import dataclass, field
-from typing import Dict
+from typing import Dict, List
 
 def defaut_ebay_headers() -> Dict[str, str]:
     """Define default eBay API headers"""
@@ -22,9 +22,17 @@ def default_ebay_params(query: str) -> Dict:
     }
     return params
 
+@dataclass
+class Listing:
+    title: str = ""
+    set_code: str = ""
+    set_name: str  = ""
+    market_value: float = 0.00
+    asking_price: float = 0.00
+    url: str = ""
 
 @dataclass
-class Ebay:
+class Config:
     """
     Represents a configuration class for eBay API settings.
 
@@ -58,19 +66,26 @@ class Ebay:
         self.access_token: str = os.getenv("API_KEY")
 
 
-    def get_prices(self) -> None:
+    def get_listings(self) -> List[Listing]:
         # Make the request
         response = requests.get(self.search_url, headers=self.headers, params=self.params)
 
         # Check if the request was successful (status code 200)
         if response.status_code == 200:
+
             # The API response is usually in JSON format
             data = response.json()
+            
             # Extract and return relevant information from the response
-
             if data["total"] > 0:
-                return data["itemSummaries"]
+                return [Listing(
+                    title=item['title'], 
+                    asking_price=item["price"]["value"],
+                    url=item['itemWebUrl']
+                ) for item in data["itemSummaries"]]
             else:
-                print("No items found")
+                return []
         else:
             print("Error:", response.status_code, response.text)
+
+    
