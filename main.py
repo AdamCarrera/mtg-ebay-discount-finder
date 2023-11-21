@@ -2,13 +2,24 @@ import ebay
 import scryfall
 
 def main() -> None:
-    ebay_handle = ebay.EbayConfig(query="mtg blood moon")
-    ebay_handle.get_prices()
 
-    scryfall_handle = scryfall.ScryfallConfig(query="black lotus")
-    print(scryfall_handle.search_url)
-    # scryfall_handle.get_scryfall_prices()
-    # scryfall_handle.get_set_codes()
+    # Query Ebay
+    ebay_handle = ebay.Ebay(query="mtg blood moon")
+    listings = ebay_handle.get_prices()
+    for item in listings:
+        print("Title:", item["title"])
+        print("Price:", item["price"]["value"], item["price"]["currency"])
+        print("Item ID:", item["itemId"])
+        print("URL:", item["itemWebUrl"])
+        print("-" * 30)
+
+    # Query Scryfall
+    scryfall_handle = scryfall.Scryfall(query="black lotus")
+
+    for set_name in scryfall_handle.sets:
+        print("-" * 30)
+        print(f"set name: {set_name}")
+        print(f"set code: {scryfall_handle.sets[set_name]}")
 
 if __name__ == "__main__":
     main()
