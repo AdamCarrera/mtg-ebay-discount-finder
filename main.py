@@ -13,11 +13,14 @@ def main() -> None:
 
     for listing in listings:
         print(listing.title)
-        print(f"Fuzzy Matches: {scryfall_handle.parse_listing_fuzzy(listing.title)}")
-        print(f"Regex Matches: {scryfall_handle.parse_listing(listing.title)}")
+        if listing.asking_price is not None:
+            print(f"Asking Price: {listing.asking_price}")
+        else:
+            print(f"Current Bid: {listing.current_bid}")
+            
+        print(f"Set Matches: {scryfall_handle.parse_listing(listing.title, option=scryfall.OPTIONS.SET)}")
+        print(f"Card Name Matches: {scryfall_handle.parse_listing(listing.title, option=scryfall.OPTIONS.NAME)}")
         print('-'*30)
-
-
 
 
 if __name__ == "__main__":

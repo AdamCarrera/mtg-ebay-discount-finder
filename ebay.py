@@ -19,6 +19,7 @@ def default_ebay_params(query: str) -> Dict:
     params = {
         "q": f"{query}",
         "limit": 5,      # Adjust the number of items you want in the response
+        "filter": "buyingOptions:{FIXED_PRICE | AUCTION}"
     }
     return params
 
@@ -29,6 +30,7 @@ class Listing:
     set_name: str  = ""
     market_value: float = 0.00
     asking_price: float = 0.00
+    current_bid: float = 0.00
     url: str = ""
 
 @dataclass
@@ -75,16 +77,19 @@ class Config:
 
             # The API response is usually in JSON format
             data = response.json()
+            # print(data)
             
             # Extract and return relevant information from the response
-            if data["total"] > 0:
+            if data["total"] <= 0:
+                return []
+            else:
                 return [Listing(
                     title=item['title'], 
-                    asking_price=item["price"]["value"],
-                    url=item['itemWebUrl']
+                    asking_price=item["price"]["value"] if "price" in item else None,
+                    url=item['itemWebUrl'],
+                    current_bid=item["currentBidPrice"]["value"] if "currentBidPrice" in item else None
                 ) for item in data["itemSummaries"]]
-            else:
-                return []
+            
         else:
             print("Error:", response.status_code, response.text)
 
