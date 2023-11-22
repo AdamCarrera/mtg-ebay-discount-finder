@@ -1,9 +1,15 @@
 from dataclasses import dataclass
+from enum import Enum
 from typing import Dict, List
 from fuzzywuzzy import fuzz
 import requests
 import json
 import re
+
+
+class OPTIONS(Enum):
+    SET = 'SET'
+    NAME = 'NAME'
 
 @dataclass
 class Scryfall:
@@ -29,6 +35,9 @@ class Scryfall:
         if self.sets is None:
             r = requests.get("https://api.scryfall.com/sets/").json()['data']
             self.sets = {item['name']: item['code'] for item in r}
+            
+            # People typically only call out 'secret lair' in their listings
+            self.sets['Secret Lair'] = 'SLD'
 
         # Define default list of card names
         if self.names is None:
@@ -42,28 +51,40 @@ class Scryfall:
     def to_collector_number(self, name, set):
         pass
 
-    def parse_listing(self, listing: str) -> list:
-        set_code_pattern = r"\b(" + "|".join(self.sets.values()) + r")\b"
+    def parse_listing(self, listing: str, option: OPTIONS) -> list:
+        """Use regular expressions to parse through a eBay listing to find
+        card and set names
 
-        patterns = [r"\b" + re.escape(name) + r"\b" for name in self.sets.keys()]
+        Args:
+            listing (str): eBay listing title
+            option (OPTIONS): enum to switch between matching set names and matching card names
 
-        set_name_pattern = "|".join(patterns)
+        Returns:
+            list: a list of matches
+        """
 
-        matches = []
+        if option == OPTIONS.SET:
+            patterns = [r"\b" + re.escape(name) + r"\b" for name in self.sets.keys()]
+        elif option == OPTIONS.NAME:
+            patterns = [r"\b" + re.escape(name) + r"\b" for name in self.names]
 
-        set_code_matches = re.findall(set_code_pattern, listing, flags=re.IGNORECASE)
-        matches.append(set_code_matches)
+        pattern = "|".join(patterns)
 
-        set_name_matches = re.findall(set_name_pattern, listing, flags=re.IGNORECASE)
-        matches.append(set_name_matches)
+        matches = re.findall(pattern, listing, flags=re.IGNORECASE)
 
         return matches
     
     def parse_listing_fuzzy(self, listing: str) -> list:
+        """Use fuzzy logic to find set names in eBay listings
+
+        Args:
+            listing (str): listing title from eBay
+
+        Returns:
+            list: a list of matches
+        """
         threshold = 70
         matches = []
-
-        # matches = [name for name in self.sets.keys() if fuzz.partial_ratio(name.lower(), listing.lower()) >= threshold]
 
         for name in self.sets.keys():
             ratio = fuzz.partial_ratio(name.lower(), listing.lower())
