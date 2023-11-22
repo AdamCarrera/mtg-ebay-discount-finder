@@ -3,3 +3,4 @@ venv
 .env
 lib
 __pycache__
+bulk-data
