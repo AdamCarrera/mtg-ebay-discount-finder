@@ -29,7 +29,7 @@ class Scryfall:
     def __post_init__(self):
         # Define default search url
         if self.search_url is None:
-            self.search_url = f"https://api.scryfall.com/cards/all/28"
+            self.search_url = f"https://api.scryfall.com/cards/named"
 
         # Define default dict of sets and set codes
         if self.sets is None:
@@ -45,8 +45,46 @@ class Scryfall:
                 data = json.load(file)
             
             self.names = [item['name'] for item in data]
+
+
+    def scryfall_search_parameters(self, set_name: str, query: str) -> Dict:
+        """Define scryfall API parameters"""
+
+        # set_code = set_name_to_set_code(set)
+        params = {
+            "fuzzy": f"{query}",
+            "set": f"{self.sets[set_name]}"
+        }
+        return params
+    
+
+    # def set_name_to_set_code(self, name: str) -> str:
+    #     return self.sets[name]
             
 
+    def named_query(self, name, set):
+        # Make the request
+        response = requests.get(self.search_url, params=self.scryfall_search_parameters(set_name=set, query=name))
+
+        # Check if the request was successful
+
+        if response.status_code == 200:
+
+            data = response.json()
+
+            print('-'*30)
+            print(data['name'])
+            print(f"Set: {data['set_name']}")
+            print(f"Market Price: {data['prices']['usd']}")
+
+            result = {
+                "name": data['name'],
+                "set": data['set_name'],
+                "market_price": data['prices']['usd']
+            }
+
+            return result
+        
 
     def to_collector_number(self, name, set):
         pass
